@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -44,6 +44,8 @@ const Index = () => {
     field: 'rating' as keyof NightlifeSpot,
     direction: 'desc' as 'asc' | 'desc'
   });
+  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
 
   // Load spots from localStorage on component mount, with initial data fallback
   useEffect(() => {
@@ -257,6 +259,34 @@ const Index = () => {
     } else {
       addSpot(spot);
     }
+  };
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocalizzazione non supportata dal browser');
+      return;
+    }
+
+    setLocationLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+        setLocationLoading(false);
+      },
+      (error) => {
+        console.error('Errore geolocalizzazione:', error);
+        alert('Impossibile ottenere la posizione corrente');
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000
+      }
+    );
   };
 
   return (
