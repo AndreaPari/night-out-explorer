@@ -138,12 +138,22 @@ const Index = () => {
       // Ordinamento per distanza
       if (sortBy.field === 'distance') {
         if (!currentLocation) return 0;
-        const aDist = a.latitude && a.longitude
+        
+        // Debug: log per vedere se le coordinate sono presenti
+        if (a.latitude === undefined || a.longitude === undefined) {
+          console.log(`Spot ${a.name} non ha coordinate`);
+        }
+        if (b.latitude === undefined || b.longitude === undefined) {
+          console.log(`Spot ${b.name} non ha coordinate`);
+        }
+        
+        const aDist = (a.latitude !== undefined && a.longitude !== undefined)
           ? getDistanceFromLatLonInKm(currentLocation.lat, currentLocation.lng, a.latitude, a.longitude)
           : Infinity;
-        const bDist = b.latitude && b.longitude
+        const bDist = (b.latitude !== undefined && b.longitude !== undefined)
           ? getDistanceFromLatLonInKm(currentLocation.lat, currentLocation.lng, b.latitude, b.longitude)
           : Infinity;
+        
         return sortBy.direction === 'asc' ? aDist - bDist : bDist - aDist;
       }
       let aValue = a[sortBy.field];
@@ -495,6 +505,11 @@ const Index = () => {
                       <div className="flex items-center gap-2 text-purple-200 text-sm">
                         <MapPin className="h-4 w-4" />
                         <span>{spot.zone}{spot.zone && ', '}{spot.city}</span>
+                        {sortBy.field === 'distance' && currentLocation && spot.latitude !== undefined && spot.longitude !== undefined && (
+                          <span className="text-green-300 text-xs">
+                            ({getDistanceFromLatLonInKm(currentLocation.lat, currentLocation.lng, spot.latitude, spot.longitude).toFixed(1)}km)
+                          </span>
+                        )}
                       </div>
                       <div className="text-purple-200 text-xs mt-1">
                         📍 {spot.address ? spot.address : <span className="text-gray-400 italic">Indirizzo non disponibile</span>}
