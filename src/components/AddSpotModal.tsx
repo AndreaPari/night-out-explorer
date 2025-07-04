@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ const categories = [
 ];
 
 const cuisineTypes = [
-  { value: '', label: 'Not specified' },
+  { value: 'not-specified', label: 'Not specified' },
   { value: 'italian', label: '🇮🇹 Italian' },
   { value: 'asian', label: '🥢 Asian' },
   { value: 'mediterranean', label: '🫒 Mediterranean' },
@@ -48,7 +49,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
     name: '',
     city: 'Milano',
     category: '',
-    cuisine: '',
+    cuisine: 'not-specified',
     zone: '',
     comments: '',
     rating: 0,
@@ -65,7 +66,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         name: editingSpot.name,
         city: editingSpot.city,
         category: editingSpot.category,
-        cuisine: editingSpot.cuisine,
+        cuisine: editingSpot.cuisine || 'not-specified',
         zone: editingSpot.zone,
         comments: editingSpot.comments,
         rating: editingSpot.rating,
@@ -79,7 +80,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         name: '',
         city: 'Milano',
         category: '',
-        cuisine: '',
+        cuisine: 'not-specified',
         zone: '',
         comments: '',
         rating: 0,
@@ -119,6 +120,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
   const handleSubmit = () => {
     const spotData = {
       ...formData,
+      cuisine: formData.cuisine === 'not-specified' ? '' : formData.cuisine,
       tags: tags
     };
     onAdd(spotData);
