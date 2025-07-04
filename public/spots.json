@@ -115,6 +115,5 @@
   { "id": "114", "name": "Nata a Milano", "city": "Milano", "category": "bar", "cuisine": "", "zone": "", "tags": ["pastel de nata"], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 },
   { "id": "115", "name": "PAN milano", "city": "Milano", "category": "bar", "cuisine": "", "zone": "", "tags": ["bakery"], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 },
   { "id": "116", "name": "Madison", "city": "Milano", "category": "club", "cuisine": "", "zone": "", "tags": [], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 },
-  { "id": "117", "name": "El tombon", "city": "Milano", "category": "dinner", "cuisine": "italian", "zone": "", "tags": ["lunch"], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 },
-  { "id": "118", "name": "Stadera", "city": "Milano", "category": "dinner", "cuisine": "italian", "zone": "", "tags": ["lunch"], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 }
+  { "id": "117", "name": "El tombon", "city": "Milano", "category": "dinner", "cuisine": "italian", "zone": "", "tags": ["lunch"], "comments": "", "rating": 4, "dateAdded": "2024-01-01T00:00:00.000Z", "price": 4 }
 ]
