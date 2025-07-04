@@ -62,6 +62,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
       rating: 0
     });
   };
+  
 
   const renderStarFilter = () => {
     return (
