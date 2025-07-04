@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown, ChevronUp, Navigation } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown, ChevronUp, Navigation, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -301,6 +301,12 @@ const Index = () => {
     }
   };
 
+  const searchOnGoogle = (spotName: string, city: string) => {
+    const query = `${spotName} ${city}`.replace(/\s+/g, '+');
+    const googleSearchUrl = `https://www.google.com/search?q=${query}`;
+    window.open(googleSearchUrl, '_blank');
+  };
+
   const getCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert('Geolocalizzazione non supportata dal browser');
@@ -562,14 +568,25 @@ const Index = () => {
                   </div>
                 </CardContent>
 
-                {/* Edit Button */}
-                <Button
-                  onClick={() => handleEditSpot(spot)}
-                  className="absolute bottom-3 right-3 h-8 w-8 p-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full"
-                  variant="ghost"
-                >
-                  <Edit className="h-4 w-4 text-white" />
-                </Button>
+                {/* Action Buttons */}
+                <div className="absolute bottom-3 right-3 flex gap-1">
+                  <Button
+                    onClick={() => searchOnGoogle(spot.name, spot.city)}
+                    className="h-8 w-8 p-0 bg-blue-500/20 hover:bg-blue-500/30 backdrop-blur-sm rounded-full"
+                    variant="ghost"
+                    title="Cerca su Google"
+                  >
+                    <ExternalLink className="h-4 w-4 text-blue-300" />
+                  </Button>
+                  <Button
+                    onClick={() => handleEditSpot(spot)}
+                    className="h-8 w-8 p-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full"
+                    variant="ghost"
+                    title="Modifica"
+                  >
+                    <Edit className="h-4 w-4 text-white" />
+                  </Button>
+                </div>
               </Card>
             ))}
           </div>
