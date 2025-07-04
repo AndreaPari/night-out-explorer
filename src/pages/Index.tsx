@@ -19,6 +19,7 @@ export interface NightlifeSpot {
   comments: string;
   rating: number;
   price: number;
+  address: string;
   latitude?: number;
   longitude?: number;
   dateAdded: string;
@@ -48,7 +49,8 @@ const Index = () => {
         // Assicuriamoci che tutti gli spot abbiano il campo price
         const spotsWithPrice = parsedSpots.map((spot: any) => ({
           ...spot,
-          price: typeof spot.price === 'number' && spot.price > 0 ? spot.price : 3
+          price: typeof spot.price === 'number' && spot.price > 0 ? spot.price : 3,
+          address: spot.address || ''
         }));
         setSpots(spotsWithPrice);
         setFilteredSpots(spotsWithPrice);
@@ -316,6 +318,11 @@ const Index = () => {
                         <MapPin className="h-4 w-4" />
                         <span>{spot.zone}{spot.zone && ', '}{spot.city}</span>
                       </div>
+                      {spot.address && (
+                        <div className="text-purple-200 text-xs mt-1">
+                          📍 {spot.address}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1">
                       {renderStars(spot.rating)}

@@ -55,6 +55,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
     price: 3,
     latitude: undefined as number | undefined,
     longitude: undefined as number | undefined,
+    address: ''
   });
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
@@ -73,6 +74,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         price: editingSpot.price,
         latitude: editingSpot.latitude,
         longitude: editingSpot.longitude,
+        address: editingSpot.address
       });
       setTags(editingSpot.tags);
     } else {
@@ -88,6 +90,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         price: 3,
         latitude: undefined,
         longitude: undefined,
+        address: ''
       });
       setTags([]);
     }
@@ -248,15 +251,28 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="zone">Zone/Neighborhood</Label>
+          <div className="space-y-2">
+            <Label htmlFor="zone" className="text-purple-200 font-medium">
+              Zone/Neighborhood
+            </Label>
             <Input
-              type="text"
               id="zone"
-              name="zone"
               value={formData.zone}
-              onChange={handleInputChange}
+              onChange={(e) => setFormData(prev => ({ ...prev, zone: e.target.value }))}
               placeholder="Zone or neighborhood"
+              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address" className="text-purple-200 font-medium">
+              Address
+            </Label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
+              placeholder="Street address"
               className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
             />
           </div>
