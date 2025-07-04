@@ -26,6 +26,22 @@ export interface NightlifeSpot {
   dateAdded: string;
 }
 
+// Funzione per calcolare la distanza tra due coordinate (in km)
+function getDistanceFromLatLonInKm(lat1: number, lon1: number, lat2: number, lon2: number) {
+  const R = 6371; // km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+type SortableField = keyof NightlifeSpot | 'distance';
+
 const Index = () => {
   const [spots, setSpots] = useState<NightlifeSpot[]>([]);
   const [filteredSpots, setFilteredSpots] = useState<NightlifeSpot[]>([]);
@@ -40,9 +56,12 @@ const Index = () => {
     zone: '',
     rating: 0
   });
-  const [sortBy, setSortBy] = useState({
-    field: 'rating' as keyof NightlifeSpot,
-    direction: 'desc' as 'asc' | 'desc'
+  const [sortBy, setSortBy] = useState<{
+    field: SortableField,
+    direction: 'asc' | 'desc'
+  }>({
+    field: 'rating',
+    direction: 'desc'
   });
   const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -116,6 +135,17 @@ const Index = () => {
 
     // Ordinamento - Create a new sorted array instead of mutating
     const sorted = [...filtered].sort((a, b) => {
+      // Ordinamento per distanza
+      if (sortBy.field === 'distance') {
+        if (!currentLocation) return 0;
+        const aDist = a.latitude && a.longitude
+          ? getDistanceFromLatLonInKm(currentLocation.lat, currentLocation.lng, a.latitude, a.longitude)
+          : Infinity;
+        const bDist = b.latitude && b.longitude
+          ? getDistanceFromLatLonInKm(currentLocation.lat, currentLocation.lng, b.latitude, b.longitude)
+          : Infinity;
+        return sortBy.direction === 'asc' ? aDist - bDist : bDist - aDist;
+      }
       let aValue = a[sortBy.field];
       let bValue = b[sortBy.field];
       
@@ -147,7 +177,7 @@ const Index = () => {
     });
 
     setFilteredSpots(sorted);
-  }, [spots, searchQuery, activeFilters, sortBy]);
+  }, [spots, searchQuery, activeFilters, sortBy, currentLocation]);
 
   const addSpot = (newSpot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
     // Evita duplicati per nome+città
@@ -241,14 +271,14 @@ const Index = () => {
     value !== '' && value !== 0
   ).length + (searchQuery ? 1 : 0);
 
-  const handleSortChange = (field: keyof NightlifeSpot) => {
+  const handleSortChange = (field: SortableField) => {
     setSortBy(prev => ({
       field,
       direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
 
-  const getSortIcon = (field: keyof NightlifeSpot) => {
+  const getSortIcon = (field: SortableField) => {
     if (sortBy.field !== field) return null;
     return sortBy.direction === 'asc' ? '↑' : '↓';
   };
@@ -354,12 +384,13 @@ const Index = () => {
               <span className="text-purple-200 text-sm">Sort by:</span>
               <div className="flex gap-1">
                 {[
-                  { field: 'name' as keyof NightlifeSpot, label: 'Name' },
-                  { field: 'rating' as keyof NightlifeSpot, label: 'Rating' },
-                  { field: 'price' as keyof NightlifeSpot, label: 'Price' },
-                  { field: 'zone' as keyof NightlifeSpot, label: 'Zone' },
-                  { field: 'category' as keyof NightlifeSpot, label: 'Category' },
-                  { field: 'dateAdded' as keyof NightlifeSpot, label: 'Date' }
+                  { field: 'distance' as SortableField, label: 'Vicini a me' },
+                  { field: 'name' as SortableField, label: 'Name' },
+                  { field: 'rating' as SortableField, label: 'Rating' },
+                  { field: 'price' as SortableField, label: 'Price' },
+                  { field: 'zone' as SortableField, label: 'Zone' },
+                  { field: 'category' as SortableField, label: 'Category' },
+                  { field: 'dateAdded' as SortableField, label: 'Date' }
                 ].map(({ field, label }) => (
                   <Button
                     key={field}
@@ -522,6 +553,12 @@ const Index = () => {
                 </Button>
               </Card>
             ))}
+          </div>
+        )}
+
+        {sortBy.field === 'distance' && !currentLocation && (
+          <div className="text-center text-yellow-300 text-sm mt-2">
+            Per ordinare per distanza, rileva prima la posizione!
           </div>
         )}
       </main>
