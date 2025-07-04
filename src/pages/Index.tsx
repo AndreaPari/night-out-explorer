@@ -43,9 +43,26 @@ const Index = () => {
   useEffect(() => {
     const savedSpots = localStorage.getItem('nightlife-spots');
     if (savedSpots) {
-      const parsedSpots = JSON.parse(savedSpots);
-      setSpots(parsedSpots);
-      setFilteredSpots(parsedSpots);
+      try {
+        const parsedSpots = JSON.parse(savedSpots);
+        // Assicuriamoci che tutti gli spot abbiano il campo price
+        const spotsWithPrice = parsedSpots.map((spot: any) => ({
+          ...spot,
+          price: typeof spot.price === 'number' && spot.price > 0 ? spot.price : 3
+        }));
+        setSpots(spotsWithPrice);
+        setFilteredSpots(spotsWithPrice);
+      } catch (error) {
+        console.error('Error parsing saved spots:', error);
+        // Carico i dati dal JSON
+        fetch('/spots.json')
+          .then(res => res.json())
+          .then(data => {
+            setSpots(data);
+            setFilteredSpots(data);
+            localStorage.setItem('nightlife-spots', JSON.stringify(data));
+          });
+      }
     } else {
       // Carico i dati dal JSON
       fetch('/spots.json')
@@ -156,11 +173,14 @@ const Index = () => {
   };
 
   const renderPrice = (price: number) => {
+    // Assicuriamoci che price sia un numero valido
+    const validPrice = typeof price === 'number' && price > 0 ? price : 3;
+    
     return Array.from({ length: 5 }, (_, i) => (
       <span
         key={i}
         className={`text-lg ${
-          i < price ? 'text-green-400' : 'text-gray-400'
+          i < validPrice ? 'text-green-400' : 'text-gray-400'
         }`}
       >
         €
