@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Filter, X, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,7 @@ interface FilterModalProps {
 }
 
 const categories = [
-  { value: '', label: 'All Categories' },
+  { value: 'all', label: 'All Categories' },
   { value: 'dinner', label: '🍽️ Dinner' },
   { value: 'cocktail', label: '🍸 Cocktail Bar' },
   { value: 'bar', label: '🍺 Bar' },
@@ -30,7 +29,7 @@ const categories = [
 ];
 
 const cuisineTypes = [
-  { value: '', label: 'All Cuisines' },
+  { value: 'all', label: 'All Cuisines' },
   { value: 'italian', label: '🇮🇹 Italian' },
   { value: 'asian', label: '🥢 Asian' },
   { value: 'mediterranean', label: '🫒 Mediterranean' },
@@ -128,8 +127,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           <div className="space-y-2">
             <Label className="text-purple-200 font-medium">Category</Label>
             <Select 
-              value={filters.category} 
-              onValueChange={(value) => handleFilterChange('category', value)}
+              value={filters.category || 'all'} 
+              onValueChange={(value) => handleFilterChange('category', value === 'all' ? '' : value)}
             >
               <SelectTrigger className="bg-white/10 border-white/20 text-white">
                 <SelectValue placeholder="Select category" />
@@ -152,8 +151,8 @@ export const FilterModal: React.FC<FilterModalProps> = ({
           <div className="space-y-2">
             <Label className="text-purple-200 font-medium">Cuisine</Label>
             <Select 
-              value={filters.cuisine} 
-              onValueChange={(value) => handleFilterChange('cuisine', value)}
+              value={filters.cuisine || 'all'} 
+              onValueChange={(value) => handleFilterChange('cuisine', value === 'all' ? '' : value)}
             >
               <SelectTrigger className="bg-white/10 border-white/20 text-white">
                 <SelectValue placeholder="Select cuisine" />
