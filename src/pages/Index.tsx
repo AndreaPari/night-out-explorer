@@ -251,6 +251,14 @@ const Index = () => {
     return sortBy.direction === 'asc' ? '↑' : '↓';
   };
 
+  const handleAddOrUpdateSpot = (spot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
+    if (editingSpot) {
+      updateSpot(spot);
+    } else {
+      addSpot(spot);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
@@ -462,7 +470,7 @@ const Index = () => {
           setIsAddModalOpen(false);
           setEditingSpot(null);
         }}
-        onAdd={editingSpot ? updateSpot : addSpot}
+        onAdd={handleAddOrUpdateSpot}
         editingSpot={editingSpot}
       />
       
