@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AddSpotModal } from '@/components/AddSpotModal';
 import { FilterModal } from '@/components/FilterModal';
 import { BulkImportModal } from '@/components/BulkImportModal';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface NightlifeSpot {
   id: string;
@@ -147,9 +148,11 @@ const Index = () => {
   }, [spots, searchQuery, activeFilters, sortBy]);
 
   const addSpot = (newSpot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
+    // Evita duplicati per nome+città
+    if (spots.some(s => s.name === newSpot.name && s.city === newSpot.city)) return;
     const spot: NightlifeSpot = {
       ...newSpot,
-      id: Date.now().toString(),
+      id: uuidv4(),
       dateAdded: new Date().toISOString()
     };
     setSpots(prev => [...prev, spot]);
@@ -172,9 +175,12 @@ const Index = () => {
   };
 
   const bulkImportSpots = (newSpots: Omit<NightlifeSpot, 'id' | 'dateAdded'>[]) => {
-    const spotsWithIds = newSpots.map((spot, index) => ({
+    const filtered = newSpots.filter(newSpot =>
+      !spots.some(s => s.name === newSpot.name && s.city === newSpot.city)
+    );
+    const spotsWithIds = filtered.map((spot) => ({
       ...spot,
-      id: (Date.now() + index).toString(),
+      id: uuidv4(),
       dateAdded: new Date().toISOString()
     }));
     setSpots(prev => [...prev, ...spotsWithIds]);
@@ -385,11 +391,9 @@ const Index = () => {
                         <MapPin className="h-4 w-4" />
                         <span>{spot.zone}{spot.zone && ', '}{spot.city}</span>
                       </div>
-                      {spot.address && (
-                        <div className="text-purple-200 text-xs mt-1">
-                          📍 {spot.address}
-                        </div>
-                      )}
+                      <div className="text-purple-200 text-xs mt-1">
+                        📍 {spot.address ? spot.address : <span className="text-gray-400 italic">Indirizzo non disponibile</span>}
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       {renderStars(spot.rating)}
