@@ -388,6 +388,38 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Current Location Section */}
+        <div className="mb-6 p-4 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Navigation className="h-5 w-5 text-purple-200" />
+              <div>
+                <h3 className="text-white font-medium">Posizione Corrente</h3>
+                {currentLocation ? (
+                  <p className="text-purple-200 text-sm">
+                    Lat: {currentLocation.lat.toFixed(6)}, Lng: {currentLocation.lng.toFixed(6)}
+                  </p>
+                ) : (
+                  <p className="text-gray-400 text-sm">Posizione non rilevata</p>
+                )}
+              </div>
+            </div>
+            <Button
+              onClick={getCurrentLocation}
+              disabled={locationLoading}
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+              size="sm"
+            >
+              {locationLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Navigation className="h-4 w-4" />
+              )}
+              {locationLoading ? 'Rilevando...' : 'Rileva Posizione'}
+            </Button>
+          </div>
+        </div>
+
         <div className="mb-6 text-center">
           <p className="text-purple-200">
             {filteredSpots.length} {filteredSpots.length === 1 ? 'spot' : 'spots'} 
