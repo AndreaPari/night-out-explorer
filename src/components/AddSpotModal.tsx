@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -53,6 +52,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
     zone: '',
     comments: '',
     rating: 0,
+    price: 3,
     latitude: undefined as number | undefined,
     longitude: undefined as number | undefined,
   });
@@ -70,6 +70,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         zone: editingSpot.zone,
         comments: editingSpot.comments,
         rating: editingSpot.rating,
+        price: editingSpot.price,
         latitude: editingSpot.latitude,
         longitude: editingSpot.longitude,
       });
@@ -84,6 +85,7 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
         zone: '',
         comments: '',
         rating: 0,
+        price: 3,
         latitude: undefined,
         longitude: undefined,
       });
@@ -129,15 +131,40 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
 
   const renderStarRating = () => {
     return (
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }, (_, i) => (
           <button
-            key={star}
+            key={i}
             type="button"
-            className={`text-2xl ${star <= formData.rating ? 'text-yellow-500' : 'text-gray-400'}`}
-            onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+            onClick={() => setFormData(prev => ({ ...prev, rating: i + 1 }))}
+            className={`p-1 rounded transition-colors ${
+              i < formData.rating 
+                ? 'bg-yellow-500 text-white' 
+                : 'bg-white/10 text-gray-400 hover:bg-white/20'
+            }`}
           >
-            <Star />
+            <Star className="h-4 w-4 fill-current" />
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const renderPriceRating = () => {
+    return (
+      <div className="flex gap-1">
+        {Array.from({ length: 5 }, (_, i) => (
+          <button
+            key={i}
+            type="button"
+            onClick={() => setFormData(prev => ({ ...prev, price: i + 1 }))}
+            className={`px-2 py-1 rounded text-sm transition-colors ${
+              i < formData.price 
+                ? 'bg-green-500 text-white' 
+                : 'bg-white/10 text-gray-400 hover:bg-white/20'
+            }`}
+          >
+            €
           </button>
         ))}
       </div>
@@ -148,8 +175,16 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-gradient-to-br from-purple-900 to-blue-900 border-white/20 text-white max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-white">
+          <DialogTitle className="text-xl font-bold text-white flex items-center justify-between">
             {editingSpot ? 'Edit Spot' : 'Add New Spot'}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="text-white hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogTitle>
         </DialogHeader>
 
@@ -268,6 +303,11 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({
           <div>
             <Label>Rating</Label>
             {renderStarRating()}
+          </div>
+
+          <div>
+            <Label>Price Range</Label>
+            {renderPriceRating()}
           </div>
 
           <Button onClick={handleSubmit} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">

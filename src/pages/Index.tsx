@@ -18,6 +18,7 @@ export interface NightlifeSpot {
   tags: string[];
   comments: string;
   rating: number;
+  price: number;
   latitude?: number;
   longitude?: number;
   dateAdded: string;
@@ -154,6 +155,19 @@ const Index = () => {
     ));
   };
 
+  const renderPrice = (price: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <span
+        key={i}
+        className={`text-lg ${
+          i < price ? 'text-green-400' : 'text-gray-400'
+        }`}
+      >
+        €
+      </span>
+    ));
+  };
+
   const clearFilters = () => {
     setActiveFilters({
       category: '',
@@ -175,7 +189,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-white">NightSpots</h1>
+                              <h1 className="text-2xl font-bold text-white">PCC - Spots</h1>
               <p className="text-purple-200 text-sm">Your nightlife companion</p>
             </div>
             <div className="flex gap-2">
@@ -276,6 +290,10 @@ const Index = () => {
                     <div className="flex items-center gap-1">
                       {renderStars(spot.rating)}
                     </div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span className="text-purple-200 text-sm mr-1">Prezzo:</span>
+                    {renderPrice(spot.price)}
                   </div>
                 </CardHeader>
                 
