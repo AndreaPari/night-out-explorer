@@ -112,8 +112,8 @@ const Index = () => {
       filtered = filtered.filter(spot => spot.rating >= activeFilters.rating);
     }
 
-    // Ordinamento
-    filtered.sort((a, b) => {
+    // Ordinamento - Create a new sorted array instead of mutating
+    const sorted = [...filtered].sort((a, b) => {
       let aValue = a[sortBy.field];
       let bValue = b[sortBy.field];
       
@@ -144,7 +144,7 @@ const Index = () => {
       return 0;
     });
 
-    setFilteredSpots(filtered);
+    setFilteredSpots(sorted);
   }, [spots, searchQuery, activeFilters, sortBy]);
 
   const addSpot = (newSpot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
