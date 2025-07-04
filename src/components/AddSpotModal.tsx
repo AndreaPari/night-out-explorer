@@ -1,18 +1,19 @@
-
-import React, { useState } from 'react';
-import { X, MapPin, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { Star, X, Plus } from 'lucide-react';
 import { NightlifeSpot } from '@/pages/Index';
 
 interface AddSpotModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (spot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => void;
+  editingSpot?: NightlifeSpot | null;
 }
 
 const categories = [
@@ -25,6 +26,7 @@ const categories = [
 ];
 
 const cuisineTypes = [
+  { value: '', label: 'Not specified' },
   { value: 'italian', label: '🇮🇹 Italian' },
   { value: 'asian', label: '🥢 Asian' },
   { value: 'mediterranean', label: '🫒 Mediterranean' },
@@ -36,81 +38,104 @@ const cuisineTypes = [
   { value: 'other', label: '🍴 Other' }
 ];
 
-export const AddSpotModal: React.FC<AddSpotModalProps> = ({ isOpen, onClose, onAdd }) => {
+export const AddSpotModal: React.FC<AddSpotModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onAdd,
+  editingSpot 
+}) => {
   const [formData, setFormData] = useState({
     name: '',
-    city: '',
+    city: 'Milano',
     category: '',
     cuisine: '',
     zone: '',
-    tags: '',
     comments: '',
     rating: 0,
-    latitude: '',
-    longitude: ''
+    latitude: undefined as number | undefined,
+    longitude: undefined as number | undefined,
   });
+  const [tags, setTags] = useState<string[]>([]);
+  const [newTag, setNewTag] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.city || !formData.category) {
-      return;
+  // Load editing spot data when modal opens
+  useEffect(() => {
+    if (editingSpot) {
+      setFormData({
+        name: editingSpot.name,
+        city: editingSpot.city,
+        category: editingSpot.category,
+        cuisine: editingSpot.cuisine,
+        zone: editingSpot.zone,
+        comments: editingSpot.comments,
+        rating: editingSpot.rating,
+        latitude: editingSpot.latitude,
+        longitude: editingSpot.longitude,
+      });
+      setTags(editingSpot.tags);
+    } else {
+      // Reset form for new spot
+      setFormData({
+        name: '',
+        city: 'Milano',
+        category: '',
+        cuisine: '',
+        zone: '',
+        comments: '',
+        rating: 0,
+        latitude: undefined,
+        longitude: undefined,
+      });
+      setTags([]);
     }
+  }, [editingSpot, isOpen]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const addTag = () => {
+    if (newTag.trim() && !tags.includes(newTag.trim())) {
+      setTags([...tags, newTag.trim()]);
+      setNewTag('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const handleSubmit = () => {
     const spotData = {
-      name: formData.name,
-      city: formData.city,
-      category: formData.category,
-      cuisine: formData.cuisine,
-      zone: formData.zone,
-      tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      comments: formData.comments,
-      rating: formData.rating,
-      latitude: formData.latitude ? parseFloat(formData.latitude) : undefined,
-      longitude: formData.longitude ? parseFloat(formData.longitude) : undefined
+      ...formData,
+      tags: tags
     };
-
     onAdd(spotData);
-    resetForm();
     onClose();
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      city: '',
-      category: '',
-      cuisine: '',
-      zone: '',
-      tags: '',
-      comments: '',
-      rating: 0,
-      latitude: '',
-      longitude: ''
-    });
-  };
-
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const renderStarRating = () => {
     return (
-      <div className="flex gap-1">
-        {Array.from({ length: 5 }, (_, i) => (
+      <div className="flex items-center">
+        {[1, 2, 3, 4, 5].map((star) => (
           <button
-            key={i}
+            key={star}
             type="button"
-            onClick={() => handleInputChange('rating', i + 1)}
-            className="p-1 hover:scale-110 transition-transform"
+            className={`text-2xl ${star <= formData.rating ? 'text-yellow-500' : 'text-gray-400'}`}
+            onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
           >
-            <Star
-              className={`h-6 w-6 ${
-                i < formData.rating 
-                  ? 'fill-yellow-400 text-yellow-400' 
-                  : 'text-gray-400 hover:text-yellow-300'
-              }`}
-            />
+            <Star />
           </button>
         ))}
       </div>
@@ -119,192 +144,134 @@ export const AddSpotModal: React.FC<AddSpotModalProps> = ({ isOpen, onClose, onA
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-br from-purple-900 to-blue-900 border-white/20 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="bg-gradient-to-br from-purple-900 to-blue-900 border-white/20 text-white max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white flex items-center gap-2">
-            <MapPin className="h-6 w-6 text-purple-400" />
-            Add New Spot
+          <DialogTitle className="text-xl font-bold text-white">
+            {editingSpot ? 'Edit Spot' : 'Add New Spot'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-6">
-          {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-purple-200">
-                Name *
-              </Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter spot name"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="city" className="text-purple-200">
-                City *
-              </Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleInputChange('city', e.target.value)}
-                placeholder="Enter city"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Category and Cuisine */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label className="text-purple-200">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent className="bg-purple-900 border-white/20">
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value} className="text-white hover:bg-white/10">
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-purple-200">Cuisine Type</Label>
-              <Select value={formData.cuisine} onValueChange={(value) => handleInputChange('cuisine', value)}>
-                <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                  <SelectValue placeholder="Select cuisine" />
-                </SelectTrigger>
-                <SelectContent className="bg-purple-900 border-white/20">
-                  {cuisineTypes.map((cuisine) => (
-                    <SelectItem key={cuisine.value} value={cuisine.value} className="text-white hover:bg-white/10">
-                      {cuisine.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          {/* Zone and Rating */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="zone" className="text-purple-200">
-                Zone/Neighborhood
-              </Label>
-              <Input
-                id="zone"
-                value={formData.zone}
-                onChange={(e) => handleInputChange('zone', e.target.value)}
-                placeholder="e.g., Isola, Boulevard, Downtown"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-purple-200">Rating</Label>
-              <div className="flex items-center gap-2">
-                {renderStarRating()}
-                <span className="text-sm text-purple-200 ml-2">
-                  {formData.rating === 0 ? 'No rating' : `${formData.rating} star${formData.rating > 1 ? 's' : ''}`}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags" className="text-purple-200">
-              Tags
-            </Label>
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="name">Name</Label>
             <Input
-              id="tags"
-              value={formData.tags}
-              onChange={(e) => handleInputChange('tags', e.target.value)}
-              placeholder="Enter tags separated by commas (e.g., rooftop, live music, romantic)"
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              placeholder="Spot name"
               className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
             />
-            <p className="text-xs text-purple-300">Separate multiple tags with commas</p>
           </div>
 
-          {/* Location */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="latitude" className="text-purple-200">
-                Latitude (Optional)
-              </Label>
-              <Input
-                id="latitude"
-                type="number"
-                step="any"
-                value={formData.latitude}
-                onChange={(e) => handleInputChange('latitude', e.target.value)}
-                placeholder="e.g., 45.4642"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="longitude" className="text-purple-200">
-                Longitude (Optional)
-              </Label>
-              <Input
-                id="longitude"
-                type="number"
-                step="any"
-                value={formData.longitude}
-                onChange={(e) => handleInputChange('longitude', e.target.value)}
-                placeholder="e.g., 9.1900"
-                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
-              />
-            </div>
-          </div>
-
-          {/* Comments */}
-          <div className="space-y-2">
-            <Label htmlFor="comments" className="text-purple-200">
-              Comments
-            </Label>
-            <Textarea
-              id="comments"
-              value={formData.comments}
-              onChange={(e) => handleInputChange('comments', e.target.value)}
-              placeholder="Add your personal notes about this spot..."
-              rows={4}
-              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 resize-none"
+          <div>
+            <Label htmlFor="city">City</Label>
+            <Input
+              type="text"
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              placeholder="City"
+              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+              disabled
             />
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                resetForm();
-                onClose();
-              }}
-              className="flex-1 border-white/20 text-white hover:bg-white/10"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
-              disabled={!formData.name || !formData.city || !formData.category}
-            >
-              Add Spot
-            </Button>
+          <div>
+            <Label>Category</Label>
+            <Select value={formData.category} onValueChange={(value) => handleSelectChange('category', value)}>
+              <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent className="bg-purple-900 border-white/20">
+                {categories.map((category) => (
+                  <SelectItem key={category.value} value={category.value} className="text-white hover:bg-white/10">
+                    {category.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </form>
+
+          <div>
+            <Label>Cuisine</Label>
+            <Select value={formData.cuisine} onValueChange={(value) => handleSelectChange('cuisine', value)}>
+              <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                <SelectValue placeholder="Select a cuisine (optional)" />
+              </SelectTrigger>
+              <SelectContent className="bg-purple-900 border-white/20">
+                {cuisineTypes.map((cuisine) => (
+                  <SelectItem key={cuisine.value} value={cuisine.value} className="text-white hover:bg-white/10">
+                    {cuisine.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="zone">Zone/Neighborhood</Label>
+            <Input
+              type="text"
+              id="zone"
+              name="zone"
+              value={formData.zone}
+              onChange={handleInputChange}
+              placeholder="Zone or neighborhood"
+              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="tags">Tags</Label>
+            <div className="flex space-x-2">
+              <Input
+                type="text"
+                id="tags"
+                placeholder="Add a tag"
+                className="bg-white/10 border-white/20 text-white placeholder:text-gray-400"
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+              />
+              <Button type="button" onClick={addTag} size="sm" className="bg-purple-500 hover:bg-purple-400 text-white">
+                Add
+              </Button>
+            </div>
+            <div className="flex flex-wrap gap-1 mt-2">
+              {tags.map((tag) => (
+                <Badge key={tag} className="bg-purple-700 text-white rounded-full px-2 py-1 text-xs flex items-center gap-1">
+                  {tag}
+                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-purple-100">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="comments">Comments</Label>
+            <Textarea
+              id="comments"
+              name="comments"
+              value={formData.comments}
+              onChange={handleInputChange}
+              placeholder="Additional comments"
+              className="bg-white/10 border-white/20 text-white placeholder:text-gray-400 min-h-[80px]"
+            />
+          </div>
+
+          <div>
+            <Label>Rating</Label>
+            {renderStarRating()}
+          </div>
+
+          <Button onClick={handleSubmit} className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+            {editingSpot ? 'Update Spot' : 'Add Spot'}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -164,6 +165,7 @@ const Index = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
+  const [editingSpot, setEditingSpot] = useState<NightlifeSpot | null>(null);
   const [activeFilters, setActiveFilters] = useState({
     category: '',
     cuisine: '',
@@ -233,6 +235,22 @@ const Index = () => {
       dateAdded: new Date().toISOString()
     };
     setSpots(prev => [...prev, spot]);
+  };
+
+  const updateSpot = (updatedSpot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
+    if (editingSpot) {
+      setSpots(prev => prev.map(spot => 
+        spot.id === editingSpot.id 
+          ? { ...spot, ...updatedSpot }
+          : spot
+      ));
+      setEditingSpot(null);
+    }
+  };
+
+  const handleEditSpot = (spot: NightlifeSpot) => {
+    setEditingSpot(spot);
+    setIsAddModalOpen(true);
   };
 
   const bulkImportSpots = (newSpots: Omit<NightlifeSpot, 'id' | 'dateAdded'>[]) => {
@@ -376,7 +394,7 @@ const Index = () => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2">
             {filteredSpots.map((spot) => (
-              <Card key={spot.id} className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-all duration-200 hover:scale-[1.02]">
+              <Card key={spot.id} className="bg-white/10 border-white/20 backdrop-blur-sm hover:bg-white/15 transition-all duration-200 hover:scale-[1.02] relative">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -428,6 +446,15 @@ const Index = () => {
                     )}
                   </div>
                 </CardContent>
+
+                {/* Edit Button */}
+                <Button
+                  onClick={() => handleEditSpot(spot)}
+                  className="absolute bottom-3 right-3 h-8 w-8 p-0 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-full"
+                  variant="ghost"
+                >
+                  <Edit className="h-4 w-4 text-white" />
+                </Button>
               </Card>
             ))}
           </div>
@@ -436,8 +463,12 @@ const Index = () => {
 
       <AddSpotModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={addSpot}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingSpot(null);
+        }}
+        onAdd={editingSpot ? updateSpot : addSpot}
+        editingSpot={editingSpot}
       />
       
       <FilterModal
