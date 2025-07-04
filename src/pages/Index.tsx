@@ -301,8 +301,8 @@ const Index = () => {
     }
   };
 
-  const searchOnGoogle = (spotName: string, city: string) => {
-    const query = `${spotName} ${city}`.replace(/\s+/g, '+');
+  const searchOnGoogle = (spotName: string, city: string, categoy: string) => {
+    const query = `${spotName} ${city} ${categoy}`.replace(/\s+/g, '+');
     const googleSearchUrl = `https://www.google.com/search?q=${query}`;
     window.open(googleSearchUrl, '_blank');
   };
@@ -571,7 +571,7 @@ const Index = () => {
                 {/* Action Buttons */}
                 <div className="absolute bottom-3 right-3 flex gap-1">
                   <Button
-                    onClick={() => searchOnGoogle(spot.name, spot.city)}
+                    onClick={() => searchOnGoogle(spot.name, spot.city, spot.category)}
                     className="h-8 w-8 p-0 bg-blue-500/20 hover:bg-blue-500/30 backdrop-blur-sm rounded-full"
                     variant="ghost"
                     title="Cerca su Google"
