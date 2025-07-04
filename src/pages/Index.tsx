@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -213,6 +213,16 @@ const Index = () => {
               <p className="text-purple-200 text-sm">Your nightlife companion</p>
             </div>
             <div className="flex gap-2">
+              <Button
+                onClick={() => {
+                  localStorage.removeItem('nightlife-spots');
+                  window.location.reload();
+                }}
+                className="bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white rounded-full h-12 w-12 p-0"
+                title="Reset Data"
+              >
+                <RefreshCw className="h-5 w-5" />
+              </Button>
               <Button
                 onClick={() => setIsBulkImportModalOpen(true)}
                 className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-full h-12 w-12 p-0"
