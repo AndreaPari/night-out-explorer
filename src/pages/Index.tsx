@@ -370,83 +370,87 @@ const Index = () => {
             />
           </div>
           
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setIsFilterModalOpen(true)}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm"
-            >
-              <Filter className="h-4 w-4 mr-2" />
-              Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
-            </Button>
-            
+          <div className="flex flex-col gap-3">
+            {/* Filters and Clear Button Row */}
             <div className="flex items-center gap-2">
-              <span className="text-purple-200 text-sm">Sort by:</span>
-              <div className="flex gap-1">
+              <Button
+                variant="outline"
+                onClick={() => setIsFilterModalOpen(true)}
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-sm px-3 py-2 h-9"
+              >
+                <Filter className="h-4 w-4 mr-2" />
+                Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
+              </Button>
+              
+              {activeFiltersCount > 0 && (
+                <Button
+                  variant="ghost"
+                  onClick={clearFilters}
+                  className="text-purple-200 hover:text-white hover:bg-white/10 text-sm px-3 py-2 h-9"
+                >
+                  Clear all
+                </Button>
+              )}
+            </div>
+            
+            {/* Sort Options - Mobile First */}
+            <div className="flex flex-col gap-2">
+              <span className="text-purple-200 text-sm font-medium">Ordina per:</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1">
                 {[
                   { field: 'distance' as SortableField, label: 'Vicini a me' },
-                  { field: 'name' as SortableField, label: 'Name' },
+                  { field: 'name' as SortableField, label: 'Nome' },
                   { field: 'rating' as SortableField, label: 'Rating' },
-                  { field: 'price' as SortableField, label: 'Price' },
-                  { field: 'zone' as SortableField, label: 'Zone' },
-                  { field: 'category' as SortableField, label: 'Category' },
-                  { field: 'dateAdded' as SortableField, label: 'Date' }
+                  { field: 'price' as SortableField, label: 'Prezzo' },
+                  { field: 'zone' as SortableField, label: 'Zona' },
+                  { field: 'category' as SortableField, label: 'Categoria' },
+                  { field: 'dateAdded' as SortableField, label: 'Data' }
                 ].map(({ field, label }) => (
                   <Button
                     key={field}
                     variant="outline"
                     size="sm"
                     onClick={() => handleSortChange(field)}
-                    className={`bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-xs px-2 py-1 h-7 ${
+                    className={`bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-xs px-2 py-1 h-8 ${
                       sortBy.field === field ? 'bg-purple-500/30 border-purple-300' : ''
                     }`}
                   >
-                    {label} {getSortIcon(field)}
+                    <span className="truncate">{label}</span> {getSortIcon(field)}
                   </Button>
                 ))}
               </div>
             </div>
-            
-            {activeFiltersCount > 0 && (
-              <Button
-                variant="ghost"
-                onClick={clearFilters}
-                className="text-purple-200 hover:text-white hover:bg-white/10"
-              >
-                Clear all
-              </Button>
-            )}
           </div>
         </div>
 
-        {/* Current Location Section */}
-        <div className="mb-6 p-4 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Navigation className="h-5 w-5 text-purple-200" />
-              <div>
-                <h3 className="text-white font-medium">Posizione Corrente</h3>
+        {/* Current Location Section - Mobile First */}
+        <div className="mb-4 p-3 bg-white/10 border border-white/20 rounded-lg backdrop-blur-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Navigation className="h-4 w-4 text-purple-200 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <h3 className="text-white font-medium text-sm">Posizione</h3>
                 {currentLocation ? (
-                  <p className="text-purple-200 text-sm">
-                    Lat: {currentLocation.lat.toFixed(6)}, Lng: {currentLocation.lng.toFixed(6)}
+                  <p className="text-purple-200 text-xs truncate">
+                    {currentLocation.lat.toFixed(4)}, {currentLocation.lng.toFixed(4)}
                   </p>
                 ) : (
-                  <p className="text-gray-400 text-sm">Posizione non rilevata</p>
+                  <p className="text-gray-400 text-xs">Non rilevata</p>
                 )}
               </div>
             </div>
             <Button
               onClick={getCurrentLocation}
               disabled={locationLoading}
-              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+              className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-xs px-3 py-1 h-8"
               size="sm"
             >
               {locationLoading ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
+                <RefreshCw className="h-3 w-3 animate-spin" />
               ) : (
-                <Navigation className="h-4 w-4" />
+                <Navigation className="h-3 w-3" />
               )}
-              {locationLoading ? 'Rilevando...' : 'Rileva Posizione'}
+              <span className="ml-1">{locationLoading ? 'Rilevando...' : 'Rileva'}</span>
             </Button>
           </div>
         </div>
