@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw } from 'lucide-react';
+import { Plus, Search, Filter, MapPin, Star, Tag, Upload, Edit, RefreshCw, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,10 @@ const Index = () => {
     cuisine: '',
     zone: '',
     rating: 0
+  });
+  const [sortBy, setSortBy] = useState({
+    field: 'rating' as keyof NightlifeSpot,
+    direction: 'desc' as 'asc' | 'desc'
   });
 
   // Load spots from localStorage on component mount, with initial data fallback
@@ -107,15 +111,40 @@ const Index = () => {
       filtered = filtered.filter(spot => spot.rating >= activeFilters.rating);
     }
 
+    // Ordinamento
     filtered.sort((a, b) => {
-      if (b.rating !== a.rating) {
-        return b.rating - a.rating;
+      let aValue = a[sortBy.field];
+      let bValue = b[sortBy.field];
+      
+      // Gestione speciale per array (tags)
+      if (Array.isArray(aValue) && Array.isArray(bValue)) {
+        aValue = aValue.join(', ');
+        bValue = bValue.join(', ');
       }
-      return a.name.localeCompare(b.name);
+      
+      // Gestione per stringhe
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortBy.direction === 'asc' ? comparison : -comparison;
+      }
+      
+      // Gestione per numeri
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sortBy.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      
+      // Gestione per date
+      if (aValue && bValue && typeof aValue === 'string' && typeof bValue === 'string') {
+        const dateA = new Date(aValue);
+        const dateB = new Date(bValue);
+        return sortBy.direction === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+      }
+      
+      return 0;
     });
 
     setFilteredSpots(filtered);
-  }, [spots, searchQuery, activeFilters]);
+  }, [spots, searchQuery, activeFilters, sortBy]);
 
   const addSpot = (newSpot: Omit<NightlifeSpot, 'id' | 'dateAdded'>) => {
     const spot: NightlifeSpot = {
@@ -204,6 +233,18 @@ const Index = () => {
     value !== '' && value !== 0
   ).length + (searchQuery ? 1 : 0);
 
+  const handleSortChange = (field: keyof NightlifeSpot) => {
+    setSortBy(prev => ({
+      field,
+      direction: prev.field === field && prev.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const getSortIcon = (field: keyof NightlifeSpot) => {
+    if (sortBy.field !== field) return null;
+    return sortBy.direction === 'asc' ? '↑' : '↓';
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Header */}
@@ -264,6 +305,32 @@ const Index = () => {
               <Filter className="h-4 w-4 mr-2" />
               Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
             </Button>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-purple-200 text-sm">Sort by:</span>
+              <div className="flex gap-1">
+                {[
+                  { field: 'name' as keyof NightlifeSpot, label: 'Name' },
+                  { field: 'rating' as keyof NightlifeSpot, label: 'Rating' },
+                  { field: 'price' as keyof NightlifeSpot, label: 'Price' },
+                  { field: 'zone' as keyof NightlifeSpot, label: 'Zone' },
+                  { field: 'category' as keyof NightlifeSpot, label: 'Category' },
+                  { field: 'dateAdded' as keyof NightlifeSpot, label: 'Date' }
+                ].map(({ field, label }) => (
+                  <Button
+                    key={field}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSortChange(field)}
+                    className={`bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-xs px-2 py-1 h-7 ${
+                      sortBy.field === field ? 'bg-purple-500/30 border-purple-300' : ''
+                    }`}
+                  >
+                    {label} {getSortIcon(field)}
+                  </Button>
+                ))}
+              </div>
+            </div>
             
             {activeFiltersCount > 0 && (
               <Button
